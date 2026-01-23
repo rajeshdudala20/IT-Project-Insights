@@ -8,7 +8,9 @@ import { ProjectsTable } from "@/components/projects-table";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { LayoutDashboard } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { LayoutDashboard, LogOut } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 import type { ProjectsResponse } from "@shared/schema";
 
 function DashboardSkeleton() {
@@ -58,6 +60,7 @@ export default function Dashboard() {
   const { data, isLoading, error } = useQuery<ProjectsResponse>({
     queryKey: ["/api/projects"],
   });
+  const { logout } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
@@ -73,7 +76,18 @@ export default function Dashboard() {
                 <p className="text-xs text-muted-foreground hidden sm:block" data-testid="text-dashboard-subtitle">KLG Group Portfolio</p>
               </div>
             </div>
-            <ThemeToggle />
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={logout}
+                title="Sign out"
+                data-testid="button-logout"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </header>
