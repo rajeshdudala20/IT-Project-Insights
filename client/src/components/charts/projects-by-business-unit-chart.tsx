@@ -1,9 +1,12 @@
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
-import type { ProjectsResponse } from "@shared/schema";
+import type { Project } from "@shared/schema";
 
 interface ProjectsByBusinessUnitChartProps {
-  data: ProjectsResponse["summary"]["projectsByBusinessUnit"];
+  projects: Project[];
+  years: number[];
 }
 
 const COLORS = [
@@ -14,15 +17,28 @@ const COLORS = [
   "hsl(var(--chart-5))",
 ];
 
-export function ProjectsByBusinessUnitChart({ data }: ProjectsByBusinessUnitChartProps) {
-  const chartData = Object.entries(data)
-    .map(([name, value]) => ({
-      name,
-      value,
-    }))
-    .sort((a, b) => b.value - a.value);
+export function ProjectsByBusinessUnitChart({ projects, years }: ProjectsByBusinessUnitChartProps) {
+  const [selectedYear, setSelectedYear] = useState<string>("all");
 
-  const total = chartData.reduce((sum, item) => sum + item.value, 0);
+  const { chartData, total } = useMemo(() => {
+    const filtered = selectedYear === "all" 
+      ? projects 
+      : projects.filter(p => String(p.year) === selectedYear);
+    
+    const byUnit: Record<string, number> = {};
+    for (const project of filtered) {
+      byUnit[project.businessUnit] = (byUnit[project.businessUnit] || 0) + 1;
+    }
+    
+    const data = Object.entries(byUnit)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+    
+    return {
+      chartData: data,
+      total: data.reduce((sum, item) => sum + item.value, 0)
+    };
+  }, [projects, selectedYear]);
 
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
     const RADIAN = Math.PI / 180;
@@ -48,9 +64,22 @@ export function ProjectsByBusinessUnitChart({ data }: ProjectsByBusinessUnitChar
 
   return (
     <Card data-testid="card-chart-projects-by-business-unit">
-      <CardHeader>
-        <CardTitle className="text-lg" data-testid="title-projects-by-business-unit">Projects by Business Unit</CardTitle>
-        <CardDescription data-testid="desc-projects-by-business-unit">Distribution across organizational units</CardDescription>
+      <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0 pb-2">
+        <div>
+          <CardTitle className="text-lg" data-testid="title-projects-by-business-unit">Projects by Business Unit</CardTitle>
+          <CardDescription data-testid="desc-projects-by-business-unit">Distribution across organizational units</CardDescription>
+        </div>
+        <Select value={selectedYear} onValueChange={setSelectedYear}>
+          <SelectTrigger className="w-[120px]" data-testid="select-year-filter-bu">
+            <SelectValue placeholder="Year" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Years</SelectItem>
+            {years.map(year => (
+              <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">

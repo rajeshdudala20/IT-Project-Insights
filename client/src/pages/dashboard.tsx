@@ -111,10 +111,10 @@ export default function Dashboard() {
             <SummaryCards data={data.summary} />
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <ProjectsByYearChart data={data.summary.projectsByYear} />
-              <ProjectsByBusinessUnitChart data={data.summary.projectsByBusinessUnit} />
-              <ProjectsByCategoryChart data={data.summary.projectsByCategory} />
-              <ProjectsBySizeChart data={data.summary.projectsBySize} />
+              <ProjectsByYearChart projects={data.projects} sizes={data.summary.sizes} />
+              <ProjectsByBusinessUnitChart projects={data.projects} years={data.summary.years} />
+              <ProjectsByCategoryChart projects={data.projects} years={data.summary.years} />
+              <ProjectsBySizeChart projects={data.projects} years={data.summary.years} />
             </div>
 
             <ProjectsTable projects={data.projects} summary={data.summary} />

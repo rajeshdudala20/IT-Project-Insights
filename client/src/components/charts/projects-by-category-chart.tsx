@@ -1,26 +1,55 @@
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import type { ProjectsResponse } from "@shared/schema";
+import type { Project } from "@shared/schema";
 
 interface ProjectsByCategoryChartProps {
-  data: ProjectsResponse["summary"]["projectsByCategory"];
+  projects: Project[];
+  years: number[];
 }
 
-export function ProjectsByCategoryChart({ data }: ProjectsByCategoryChartProps) {
-  const chartData = Object.entries(data)
-    .map(([category, count]) => ({
-      category: category.length > 20 ? category.substring(0, 20) + "..." : category,
-      fullCategory: category,
-      count,
-    }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 10); // Top 10 categories
+export function ProjectsByCategoryChart({ projects, years }: ProjectsByCategoryChartProps) {
+  const [selectedYear, setSelectedYear] = useState<string>("all");
+
+  const chartData = useMemo(() => {
+    const filtered = selectedYear === "all" 
+      ? projects 
+      : projects.filter(p => String(p.year) === selectedYear);
+    
+    const byCategory: Record<string, number> = {};
+    for (const project of filtered) {
+      byCategory[project.category] = (byCategory[project.category] || 0) + 1;
+    }
+    
+    return Object.entries(byCategory)
+      .map(([category, count]) => ({
+        category: category.length > 20 ? category.substring(0, 20) + "..." : category,
+        fullCategory: category,
+        count,
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+  }, [projects, selectedYear]);
 
   return (
     <Card data-testid="card-chart-projects-by-category">
-      <CardHeader>
-        <CardTitle className="text-lg" data-testid="title-projects-by-category">Top Categories</CardTitle>
-        <CardDescription data-testid="desc-projects-by-category">Most common project types</CardDescription>
+      <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0 pb-2">
+        <div>
+          <CardTitle className="text-lg" data-testid="title-projects-by-category">Top Categories</CardTitle>
+          <CardDescription data-testid="desc-projects-by-category">Most common project types</CardDescription>
+        </div>
+        <Select value={selectedYear} onValueChange={setSelectedYear}>
+          <SelectTrigger className="w-[120px]" data-testid="select-year-filter-cat">
+            <SelectValue placeholder="Year" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Years</SelectItem>
+            {years.map(year => (
+              <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">

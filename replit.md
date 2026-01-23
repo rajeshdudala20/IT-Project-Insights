@@ -11,10 +11,11 @@ A comprehensive dashboard for visualizing IT projects across the KLG Group organ
 - Multi-brand login page with Kaplan, Alpadia, ESL, and Azurlingua logos
 - Authentication via master password or magic link email
 - Summary cards showing total projects, current year projects, business units, and categories
-- Bar chart showing projects by year
-- Pie/donut chart showing projects by business unit
-- Horizontal bar chart showing top project categories
-- Bar chart showing project size distribution (XL, L, M, S)
+- **Interactive Charts with Filters:**
+  - Bar chart showing projects by year (with Size filter)
+  - Pie/donut chart showing projects by business unit (with Year filter)
+  - Horizontal bar chart showing top project categories (with Year filter)
+  - Bar chart showing project size distribution (with Year filter)
 - Searchable and filterable data table with all projects
 - Dark/light theme toggle
 - Logout functionality
@@ -75,7 +76,7 @@ interface Project {
   project: string;
   businessUnit: string;
   category: string;
-  size: string;  // XL, L, M, S
+  size: string;  // XXL, XL, L, M, S
 }
 ```
 
@@ -86,7 +87,7 @@ npm run dev
 ```
 
 ## Data Source
-Projects are loaded from `attached_assets/KLG_Projects_1769167456131.xlsx` containing IT projects from 2020-2025.
+Projects are loaded from `attached_assets/KLG_Portfolio_Overview-Summary_2020-Present_1769180079644.xlsx` containing 72 IT projects from 2020-2025.
 
 ## Brand Assets
 Logos are stored in `attached_assets/`:

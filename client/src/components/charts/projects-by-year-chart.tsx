@@ -1,18 +1,32 @@
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import type { ProjectsResponse } from "@shared/schema";
+import type { Project } from "@shared/schema";
 
 interface ProjectsByYearChartProps {
-  data: ProjectsResponse["summary"]["projectsByYear"];
+  projects: Project[];
+  sizes: string[];
 }
 
-export function ProjectsByYearChart({ data }: ProjectsByYearChartProps) {
-  const chartData = Object.entries(data)
-    .map(([year, count]) => ({
-      year,
-      count,
-    }))
-    .sort((a, b) => Number(a.year) - Number(b.year));
+export function ProjectsByYearChart({ projects, sizes }: ProjectsByYearChartProps) {
+  const [selectedSize, setSelectedSize] = useState<string>("all");
+
+  const chartData = useMemo(() => {
+    const filtered = selectedSize === "all" 
+      ? projects 
+      : projects.filter(p => p.size === selectedSize);
+    
+    const byYear: Record<string, number> = {};
+    for (const project of filtered) {
+      const year = String(project.year);
+      byYear[year] = (byYear[year] || 0) + 1;
+    }
+    
+    return Object.entries(byYear)
+      .map(([year, count]) => ({ year, count }))
+      .sort((a, b) => Number(a.year) - Number(b.year));
+  }, [projects, selectedSize]);
 
   const colors = [
     "hsl(var(--chart-1))",
@@ -25,9 +39,22 @@ export function ProjectsByYearChart({ data }: ProjectsByYearChartProps) {
 
   return (
     <Card data-testid="card-chart-projects-by-year">
-      <CardHeader>
-        <CardTitle className="text-lg" data-testid="title-projects-by-year">Projects by Year</CardTitle>
-        <CardDescription data-testid="desc-projects-by-year">Annual distribution of IT projects</CardDescription>
+      <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0 pb-2">
+        <div>
+          <CardTitle className="text-lg" data-testid="title-projects-by-year">Projects by Year</CardTitle>
+          <CardDescription data-testid="desc-projects-by-year">Annual distribution of IT projects</CardDescription>
+        </div>
+        <Select value={selectedSize} onValueChange={setSelectedSize}>
+          <SelectTrigger className="w-[120px]" data-testid="select-size-filter">
+            <SelectValue placeholder="Size" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Sizes</SelectItem>
+            {sizes.map(size => (
+              <SelectItem key={size} value={size}>{size}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">

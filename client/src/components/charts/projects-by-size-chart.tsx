@@ -1,12 +1,17 @@
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import type { ProjectsResponse } from "@shared/schema";
+import type { Project } from "@shared/schema";
 
 interface ProjectsBySizeChartProps {
-  data: ProjectsResponse["summary"]["projectsBySize"];
+  projects: Project[];
+  years: number[];
 }
 
-export function ProjectsBySizeChart({ data }: ProjectsBySizeChartProps) {
+export function ProjectsBySizeChart({ projects, years }: ProjectsBySizeChartProps) {
+  const [selectedYear, setSelectedYear] = useState<string>("all");
+
   const sizeOrder = ["XL", "L", "M", "S"];
   const sizeLabels: Record<string, string> = {
     XL: "Extra Large",
@@ -22,22 +27,49 @@ export function ProjectsBySizeChart({ data }: ProjectsBySizeChartProps) {
     S: "hsl(var(--chart-3))",
   };
 
-  const chartData = sizeOrder
-    .filter(size => data[size] !== undefined)
-    .map(size => ({
-      size,
-      label: sizeLabels[size] || size,
-      count: data[size] || 0,
-      color: sizeColors[size] || "hsl(var(--chart-1))",
-    }));
-
-  const total = chartData.reduce((sum, item) => sum + item.count, 0);
+  const { chartData, total } = useMemo(() => {
+    const filtered = selectedYear === "all" 
+      ? projects 
+      : projects.filter(p => String(p.year) === selectedYear);
+    
+    const bySize: Record<string, number> = {};
+    for (const project of filtered) {
+      bySize[project.size] = (bySize[project.size] || 0) + 1;
+    }
+    
+    const data = sizeOrder
+      .filter(size => bySize[size] !== undefined)
+      .map(size => ({
+        size,
+        label: sizeLabels[size] || size,
+        count: bySize[size] || 0,
+        color: sizeColors[size] || "hsl(var(--chart-1))",
+      }));
+    
+    return {
+      chartData: data,
+      total: data.reduce((sum, item) => sum + item.count, 0)
+    };
+  }, [projects, selectedYear]);
 
   return (
     <Card data-testid="card-chart-projects-by-size">
-      <CardHeader>
-        <CardTitle className="text-lg" data-testid="title-projects-by-size">Project Sizes</CardTitle>
-        <CardDescription data-testid="desc-projects-by-size">Distribution by project complexity</CardDescription>
+      <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0 pb-2">
+        <div>
+          <CardTitle className="text-lg" data-testid="title-projects-by-size">Project Sizes</CardTitle>
+          <CardDescription data-testid="desc-projects-by-size">Distribution by project complexity</CardDescription>
+        </div>
+        <Select value={selectedYear} onValueChange={setSelectedYear}>
+          <SelectTrigger className="w-[120px]" data-testid="select-year-filter-size">
+            <SelectValue placeholder="Year" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Years</SelectItem>
+            {years.map(year => (
+              <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
@@ -64,7 +96,7 @@ export function ProjectsBySizeChart({ data }: ProjectsBySizeChartProps) {
                 }}
                 labelStyle={{ color: "hsl(var(--foreground))" }}
                 formatter={(value: number, name: string, props: any) => [
-                  `${value} projects (${((value / total) * 100).toFixed(1)}%)`,
+                  `${value} projects (${total > 0 ? ((value / total) * 100).toFixed(1) : 0}%)`,
                   props.payload.label
                 ]}
                 labelFormatter={() => ""}
