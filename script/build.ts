@@ -1,6 +1,7 @@
 import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
-import { rm, readFile } from "fs/promises";
+import { rm, readFile, mkdir, copyFile, readdir, stat } from "fs/promises";
+import { join } from "path";
 
 // server deps to bundle to reduce openat(2) syscalls
 // which helps cold start times
@@ -59,6 +60,28 @@ async function buildAll() {
     external: externals,
     logLevel: "info",
   });
+
+  // Copy attached_assets folder to dist for production
+  console.log("copying attached_assets...");
+  await copyDirectory("attached_assets", "dist/attached_assets");
+}
+
+async function copyDirectory(src: string, dest: string) {
+  try {
+    await mkdir(dest, { recursive: true });
+    const entries = await readdir(src, { withFileTypes: true });
+    for (const entry of entries) {
+      const srcPath = join(src, entry.name);
+      const destPath = join(dest, entry.name);
+      if (entry.isDirectory()) {
+        await copyDirectory(srcPath, destPath);
+      } else {
+        await copyFile(srcPath, destPath);
+      }
+    }
+  } catch (err) {
+    console.warn(`Warning: Could not copy ${src}: ${err}`);
+  }
 }
 
 buildAll().catch((err) => {

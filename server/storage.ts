@@ -1,11 +1,18 @@
 import { type User, type InsertUser, type Project, type ProjectsResponse } from "@shared/schema";
 import { randomUUID } from "crypto";
 import * as path from "path";
-import { createRequire } from "module";
+import * as fs from "fs";
 
-// Use require for xlsx as ESM import has issues with this library
-const require = createRequire(import.meta.url);
-const XLSX = require("xlsx");
+// xlsx supports both CJS and ESM - use dynamic import
+let xlsxModule: any;
+async function loadXLSX() {
+  if (!xlsxModule) {
+    const imported = await import("xlsx");
+    // Handle both ESM and CJS module structures
+    xlsxModule = imported.default || imported;
+  }
+  return xlsxModule;
+}
 
 // modify the interface with any CRUD methods
 // you might need
@@ -47,10 +54,24 @@ export class MemStorage implements IStorage {
       return this.projectsCache;
     }
 
-    const filePath = path.join(process.cwd(), "attached_assets", "KLG_Projects_1769167456131.xlsx");
-    const workbook = XLSX.readFile(filePath);
+    // Load xlsx library
+    const xlsx = await loadXLSX();
+    
+    // In production, the file is copied to dist/attached_assets
+    // In development, it's at attached_assets
+    let filePath = path.join(process.cwd(), "attached_assets", "KLG_Projects_1769167456131.xlsx");
+    
+    // Check if running from dist folder (production)
+    if (process.env.NODE_ENV === "production") {
+      const distPath = path.join(process.cwd(), "dist", "attached_assets", "KLG_Projects_1769167456131.xlsx");
+      if (fs.existsSync(distPath)) {
+        filePath = distPath;
+      }
+    }
+    
+    const workbook = xlsx.readFile(filePath);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rawData = XLSX.utils.sheet_to_json(sheet) as any[];
+    const rawData = xlsx.utils.sheet_to_json(sheet) as any[];
 
     // Parse and clean the data - use flexible key matching
     const projects: Project[] = [];
