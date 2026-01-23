@@ -114,7 +114,7 @@ export default function Dashboard() {
               <ProjectsByYearChart projects={data.projects} sizes={data.summary.sizes} />
               <ProjectsByBusinessUnitChart projects={data.projects} years={data.summary.years} />
               <ProjectsByCategoryChart projects={data.projects} years={data.summary.years} />
-              <ProjectsBySizeChart projects={data.projects} years={data.summary.years} />
+              <ProjectsBySizeChart projects={data.projects} businessUnits={data.summary.businessUnits} />
             </div>
 
             <ProjectsTable projects={data.projects} summary={data.summary} />

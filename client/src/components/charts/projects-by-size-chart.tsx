@@ -6,11 +6,11 @@ import type { Project } from "@shared/schema";
 
 interface ProjectsBySizeChartProps {
   projects: Project[];
-  years: number[];
+  businessUnits: string[];
 }
 
-export function ProjectsBySizeChart({ projects, years }: ProjectsBySizeChartProps) {
-  const [selectedYear, setSelectedYear] = useState<string>("all");
+export function ProjectsBySizeChart({ projects, businessUnits }: ProjectsBySizeChartProps) {
+  const [selectedBusinessUnit, setSelectedBusinessUnit] = useState<string>("all");
 
   const sizeOrder = ["XL", "L", "M", "S"];
   const sizeLabels: Record<string, string> = {
@@ -28,9 +28,9 @@ export function ProjectsBySizeChart({ projects, years }: ProjectsBySizeChartProp
   };
 
   const { chartData, total } = useMemo(() => {
-    const filtered = selectedYear === "all" 
+    const filtered = selectedBusinessUnit === "all" 
       ? projects 
-      : projects.filter(p => String(p.year) === selectedYear);
+      : projects.filter(p => p.businessUnit === selectedBusinessUnit);
     
     const bySize: Record<string, number> = {};
     for (const project of filtered) {
@@ -50,7 +50,7 @@ export function ProjectsBySizeChart({ projects, years }: ProjectsBySizeChartProp
       chartData: data,
       total: data.reduce((sum, item) => sum + item.count, 0)
     };
-  }, [projects, selectedYear]);
+  }, [projects, selectedBusinessUnit]);
 
   return (
     <Card data-testid="card-chart-projects-by-size">
@@ -59,14 +59,14 @@ export function ProjectsBySizeChart({ projects, years }: ProjectsBySizeChartProp
           <CardTitle className="text-lg" data-testid="title-projects-by-size">Project Sizes</CardTitle>
           <CardDescription data-testid="desc-projects-by-size">Distribution by project complexity</CardDescription>
         </div>
-        <Select value={selectedYear} onValueChange={setSelectedYear}>
-          <SelectTrigger className="w-[120px]" data-testid="select-year-filter-size">
-            <SelectValue placeholder="Year" />
+        <Select value={selectedBusinessUnit} onValueChange={setSelectedBusinessUnit}>
+          <SelectTrigger className="w-[160px]" data-testid="select-bu-filter-size">
+            <SelectValue placeholder="Business Unit" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Years</SelectItem>
-            {years.map(year => (
-              <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+            <SelectItem value="all">All Units</SelectItem>
+            {businessUnits.map(bu => (
+              <SelectItem key={bu} value={bu}>{bu}</SelectItem>
             ))}
           </SelectContent>
         </Select>

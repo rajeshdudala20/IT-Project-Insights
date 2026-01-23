@@ -32,6 +32,11 @@ export async function registerRoutes(
     process.exit(1);
   }
 
+  // Trust proxy for production (Replit runs behind a reverse proxy)
+  if (process.env.NODE_ENV === "production") {
+    app.set("trust proxy", 1);
+  }
+
   app.use(
     session({
       secret: sessionSecret || "dev-only-secret-not-for-production",
@@ -40,8 +45,8 @@ export async function registerRoutes(
       cookie: {
         secure: process.env.NODE_ENV === "production",
         httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000,
-        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days for better persistence
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       },
     })
   );

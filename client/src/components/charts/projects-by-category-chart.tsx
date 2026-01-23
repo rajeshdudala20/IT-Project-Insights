@@ -24,7 +24,7 @@ export function ProjectsByCategoryChart({ projects, years }: ProjectsByCategoryC
     
     return Object.entries(byCategory)
       .map(([category, count]) => ({
-        category: category.length > 20 ? category.substring(0, 20) + "..." : category,
+        category: category.length > 25 ? category.substring(0, 25) + "..." : category,
         fullCategory: category,
         count,
       }))
@@ -72,7 +72,8 @@ export function ProjectsByCategoryChart({ projects, years }: ProjectsByCategoryC
                 className="text-xs fill-muted-foreground"
                 tickLine={false}
                 axisLine={false}
-                width={120}
+                width={150}
+                tick={{ fontSize: 11 }}
               />
               <Tooltip
                 contentStyle={{
