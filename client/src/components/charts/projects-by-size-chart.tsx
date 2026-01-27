@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import type { Project } from "@shared/schema";
 
 interface ProjectsBySizeChartProps {
@@ -12,53 +12,46 @@ interface ProjectsBySizeChartProps {
 export function ProjectsBySizeChart({ projects, businessUnits }: ProjectsBySizeChartProps) {
   const [selectedBusinessUnit, setSelectedBusinessUnit] = useState<string>("all");
 
-  const sizeOrder = ["XL", "L", "M", "S"];
-  const sizeLabels: Record<string, string> = {
-    XL: "Extra Large",
-    L: "Large",
-    M: "Medium",
-    S: "Small",
-  };
-  
-  const sizeColors: Record<string, string> = {
-    XL: "hsl(var(--chart-5))",
-    L: "hsl(var(--chart-1))",
-    M: "hsl(var(--chart-2))",
-    S: "hsl(var(--chart-3))",
-  };
+  // Auto-derive years from data
+  const years = useMemo(
+    () => Array.from(new Set(projects.map(p => p.year))).sort(),
+    [projects]
+  );
 
-  const { chartData, total } = useMemo(() => {
-    const filtered = selectedBusinessUnit === "all" 
-      ? projects 
-      : projects.filter(p => p.businessUnit === selectedBusinessUnit);
-    
-    const bySize: Record<string, number> = {};
-    for (const project of filtered) {
-      bySize[project.size] = (bySize[project.size] || 0) + 1;
+  // Transform: BU = bars, Year = stacks
+  const chartData = useMemo(() => {
+    let filtered = projects;
+    if (selectedBusinessUnit !== "all") {
+      filtered = filtered.filter(p => p.businessUnit === selectedBusinessUnit);
     }
-    
-    const data = sizeOrder
-      .filter(size => bySize[size] !== undefined)
-      .map(size => ({
-        size,
-        label: sizeLabels[size] || size,
-        count: bySize[size] || 0,
-        color: sizeColors[size] || "hsl(var(--chart-1))",
-      }));
-    
-    return {
-      chartData: data,
-      total: data.reduce((sum, item) => sum + item.count, 0)
-    };
+
+    const byBU: Record<string, Record<number, number>> = {};
+    for (const p of filtered) {
+      const bu = p.businessUnit;
+      const yr = p.year;
+      if (!byBU[bu]) byBU[bu] = {};
+      if (!byBU[bu][yr]) byBU[bu][yr] = 0;
+      byBU[bu][yr]++;
+    }
+
+    return Object.entries(byBU).map(([bu, yearMap]) => ({
+      businessUnit: bu,
+      ...yearMap
+    }));
   }, [projects, selectedBusinessUnit]);
 
   return (
     <Card data-testid="card-chart-projects-by-size">
       <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0 pb-2">
         <div>
-          <CardTitle className="text-lg" data-testid="title-projects-by-size">Project Sizes</CardTitle>
-          <CardDescription data-testid="desc-projects-by-size">Distribution by project complexity</CardDescription>
+          <CardTitle className="text-lg" data-testid="title-projects-by-size">
+            Project Sizes by Business Unit
+          </CardTitle>
+          <CardDescription data-testid="desc-projects-by-size">
+            Stacked yearly distribution across business units
+          </CardDescription>
         </div>
+
         <Select value={selectedBusinessUnit} onValueChange={setSelectedBusinessUnit}>
           <SelectTrigger className="w-[160px]" data-testid="select-bu-filter-size">
             <SelectValue placeholder="Business Unit" />
@@ -71,22 +64,26 @@ export function ProjectsBySizeChart({ projects, businessUnits }: ProjectsBySizeC
           </SelectContent>
         </Select>
       </CardHeader>
+
       <CardContent>
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-border" vertical={false} />
-              <XAxis 
-                dataKey="size" 
+
+              <XAxis
+                dataKey="businessUnit"
                 className="text-xs fill-muted-foreground"
                 tickLine={false}
                 axisLine={false}
               />
-              <YAxis 
+
+              <YAxis
                 className="text-xs fill-muted-foreground"
                 tickLine={false}
                 axisLine={false}
               />
+
               <Tooltip
                 contentStyle={{
                   backgroundColor: "hsl(var(--card))",
@@ -95,18 +92,21 @@ export function ProjectsBySizeChart({ projects, businessUnits }: ProjectsBySizeC
                   boxShadow: "var(--shadow-lg)",
                 }}
                 labelStyle={{ color: "hsl(var(--foreground))" }}
-                formatter={(value: number, name: string, props: any) => [
-                  `${value} projects (${total > 0 ? ((value / total) * 100).toFixed(1) : 0}%)`,
-                  props.payload.label
-                ]}
-                labelFormatter={() => ""}
+                formatter={(v: number, y: number) => [`${v} projects`, y]}
                 cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }}
               />
-              <Bar dataKey="count" radius={[4, 4, 0, 0]} name="Projects">
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Bar>
+
+              <Legend verticalAlign="top" align="right" wrapperStyle={{ fontSize: "12px" }} />
+
+              {years.map((year, index) => (
+                <Bar
+                  key={year}
+                  dataKey={String(year)}
+                  stackId="year"
+                  fill={`hsl(var(--chart-${(index % 6) + 1}))`}
+                  name={String(year)}
+                />
+              ))}
             </BarChart>
           </ResponsiveContainer>
         </div>
