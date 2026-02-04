@@ -4,10 +4,11 @@ import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Lock, Loader2 } from "lucide-react";
+import { Lock, Loader2 } from "lucide-react";
+// import { Mail } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/lib/auth";
 
@@ -20,9 +21,9 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { isAuthenticated, isLoading, login } = useAuth();
-  const [email, setEmail] = useState("");
+  // const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [magicLinkSent, setMagicLinkSent] = useState(false);
+  // const [magicLinkSent, setMagicLinkSent] = useState(false);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -52,6 +53,7 @@ export default function Login() {
     },
   });
 
+  /* Magic link login - temporarily disabled
   const magicLinkMutation = useMutation({
     mutationFn: async (email: string) => {
       const response = await apiRequest("POST", "/api/auth/magic-link", { email });
@@ -73,17 +75,18 @@ export default function Login() {
     },
   });
 
-  const handlePasswordLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password.trim()) {
-      passwordLoginMutation.mutate(password);
-    }
-  };
-
   const handleMagicLink = (e: React.FormEvent) => {
     e.preventDefault();
     if (email.trim()) {
       magicLinkMutation.mutate(email);
+    }
+  };
+  */
+
+  const handlePasswordLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password.trim()) {
+      passwordLoginMutation.mutate(password);
     }
   };
 
@@ -144,6 +147,41 @@ export default function Login() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Password login only - Magic link temporarily disabled */}
+            <form onSubmit={handlePasswordLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="password">Master Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter master password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  data-testid="input-password"
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={passwordLoginMutation.isPending}
+                data-testid="button-login"
+              >
+                {passwordLoginMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4 mr-2" />
+                    Sign In
+                  </>
+                )}
+              </Button>
+            </form>
+
+            {/* Magic link login - temporarily disabled
             <Tabs defaultValue="magic-link" className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="magic-link" data-testid="tab-magic-link">
@@ -247,6 +285,7 @@ export default function Login() {
                 </form>
               </TabsContent>
             </Tabs>
+            */}
           </CardContent>
         </Card>
 
