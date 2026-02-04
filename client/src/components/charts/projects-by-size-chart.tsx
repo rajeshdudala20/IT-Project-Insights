@@ -45,7 +45,7 @@ export function ProjectsBySizeChart({ projects, businessUnits }: ProjectsBySizeC
       <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0 pb-2">
         <div>
           <CardTitle className="text-lg" data-testid="title-projects-by-size">
-            Project Sizes by Business Unit
+            Project Count by Business Unit
           </CardTitle>
           <CardDescription data-testid="desc-projects-by-size">
             Stacked yearly distribution across business units

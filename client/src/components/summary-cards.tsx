@@ -16,7 +16,7 @@ export function SummaryCards({ data }: SummaryCardsProps) {
 
   const cards = [
     {
-      title: "Total Projects",
+      title: "KLG IT Projects owned to close-out",
       value: data.totalProjects,
       description: `${data.years.length} years of data`,
       icon: Briefcase,
@@ -26,13 +26,13 @@ export function SummaryCards({ data }: SummaryCardsProps) {
     {
       title: "2025 Projects",
       value: data.projectsByYear["2025"] || 0,
-      description: `${growthRate >= 0 ? '+' : ''}${growthRate}% from 2024`,
+      description: `Delivered Projects`,
       icon: TrendingUp,
       iconColor: "text-chart-2",
       bgColor: "bg-chart-2/10",
     },
     {
-      title: "Business Units",
+      title: "Business Unit Categorisation",
       value: data.businessUnits.length,
       description: "Active units",
       icon: Building2,
@@ -40,9 +40,9 @@ export function SummaryCards({ data }: SummaryCardsProps) {
       bgColor: "bg-chart-3/10",
     },
     {
-      title: "Categories",
+      title: "Project Categories",
       value: data.categories.length,
-      description: "Project types",
+      description: "Sponsoring Departments",
       icon: Layers,
       iconColor: "text-chart-4",
       bgColor: "bg-chart-4/10",

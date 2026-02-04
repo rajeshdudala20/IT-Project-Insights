@@ -72,7 +72,7 @@ export default function Dashboard() {
                 <LayoutDashboard className="h-4 w-4" />
               </div>
               <div className="flex flex-col">
-                <h1 className="text-lg font-semibold leading-tight" data-testid="text-dashboard-title">IT Projects Dashboard</h1>
+                <h1 className="text-lg font-semibold leading-tight" data-testid="text-dashboard-title">KLG IT Portfolio, Programme & Projects Dashboard</h1>
                 <p className="text-xs text-muted-foreground hidden sm:block" data-testid="text-dashboard-subtitle">KLG Group Portfolio</p>
               </div>
             </div>
@@ -117,7 +117,7 @@ export default function Dashboard() {
               <ProjectsBySizeChart projects={data.projects} businessUnits={data.summary.businessUnits} />
             </div>
 
-            <ProjectsTable projects={data.projects} summary={data.summary} />
+            {/* <ProjectsTable projects={data.projects} summary={data.summary} /> */}
           </div>
         ) : null}
       </main>
@@ -125,7 +125,7 @@ export default function Dashboard() {
       <footer className="border-t mt-8">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <p className="text-center text-sm text-muted-foreground">
-            IT Projects Dashboard - KLG Group
+           KLG IT Portfolio, Programme & Projects Dashboard
           </p>
         </div>
       </footer>

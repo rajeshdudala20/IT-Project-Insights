@@ -66,7 +66,7 @@ export function ProjectsByBusinessUnitChart({ projects, years }: ProjectsByBusin
     <Card data-testid="card-chart-projects-by-business-unit">
       <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0 pb-2">
         <div>
-          <CardTitle className="text-lg" data-testid="title-projects-by-business-unit">Projects by Business Unit</CardTitle>
+          <CardTitle className="text-lg" data-testid="title-projects-by-business-unit">Projects by Business Unit Categorisation</CardTitle>
           <CardDescription data-testid="desc-projects-by-business-unit">Distribution across organizational units</CardDescription>
         </div>
         <Select value={selectedYear} onValueChange={setSelectedYear}>

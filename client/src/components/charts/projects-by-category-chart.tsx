@@ -36,8 +36,8 @@ export function ProjectsByCategoryChart({ projects, years }: ProjectsByCategoryC
     <Card data-testid="card-chart-projects-by-category">
       <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0 pb-2">
         <div>
-          <CardTitle className="text-lg" data-testid="title-projects-by-category">Top Categories</CardTitle>
-          <CardDescription data-testid="desc-projects-by-category">Most common project types</CardDescription>
+          <CardTitle className="text-lg" data-testid="title-projects-by-category">Project Categorisation</CardTitle>
+          <CardDescription data-testid="desc-projects-by-category">Rough project sponsorship by area/department</CardDescription>
         </div>
         <Select value={selectedYear} onValueChange={setSelectedYear}>
           <SelectTrigger className="w-[120px]" data-testid="select-year-filter-cat">

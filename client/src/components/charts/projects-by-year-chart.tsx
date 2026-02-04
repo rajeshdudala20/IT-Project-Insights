@@ -43,7 +43,7 @@ export function ProjectsByYearChart({ projects, sizes }: ProjectsByYearChartProp
     <Card data-testid="card-chart-projects-by-year">
       <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0 pb-2">
         <div>
-          <CardTitle className="text-lg" data-testid="title-projects-by-year">Projects by Year</CardTitle>
+          <CardTitle className="text-lg" data-testid="title-projects-by-year">Project T-Shirt Sizing by Year</CardTitle>
           <CardDescription data-testid="desc-projects-by-year">
             Annual distribution of IT projects by size
           </CardDescription>
